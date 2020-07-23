@@ -39,6 +39,7 @@ export default function createStylisInstance({
 
   let _componentId: string;
   let _selector: string;
+  let _selectorRegTpl: string;
   let _selectorRegexp: RegExp;
 
   const selfReferenceReplacer = (match, offset, string) => {
@@ -71,6 +72,9 @@ export default function createStylisInstance({
    */
   const selfReferenceReplacementPlugin = (context, _, selectors) => {
     if (context === 2 && selectors.length && selectors[0].lastIndexOf(_selector) > 0) {
+      if (!_selectorRegexp) {
+        _selectorRegexp = new RegExp(`\\${_selectorRegTpl}\\b`, 'g');
+      }
       // eslint-disable-next-line no-param-reassign
       selectors[0] = selectors[0].replace(_selectorRegexp, selfReferenceReplacer);
     }
@@ -87,7 +91,8 @@ export default function createStylisInstance({
     // these properties stay in sync with the current stylis run
     _componentId = componentId;
     _selector = selector;
-    _selectorRegexp = new RegExp(`\\${_selector}\\b`, 'g');
+    _selectorRegTpl = _selector;
+    _selectorRegexp = null;
 
     return stylis(prefix || !selector ? '' : selector, cssStr);
   }
